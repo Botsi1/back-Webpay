@@ -1,12 +1,19 @@
 const WebpayPlus = require("transbank-sdk").WebpayPlus;
 const TransactionDetail = require("transbank-sdk").TransactionDetail;
-const IntegrationCommerceCodes = require("transbank-sdk").IntegrationCommerceCodes;
+const IntegrationCommerceCodes =
+  require("transbank-sdk").IntegrationCommerceCodes;
 const asyncHandler = require("../utils/async_handler");
 
 exports.create = asyncHandler(async function (request, response, next) {
+  const amount = request.body.total
+    ? request.body.total
+    : Math.floor(Math.random() * 100) + 101;
+  console.log("hola", amount);
   let buyOrder = "O-" + Math.floor(Math.random() * 10000) + 1;
   let sessionId = "S-" + Math.floor(Math.random() * 10000) + 1;
   let childCommerceCode;
+  //La variable child deberia llegar por query,body,params
+  //Averiguar esto
   if (process.env.WPPM_CC && process.env.WPPM_KEY) {
     childCommerceCode = process.env.WPPM_C_CC;
   } else {
@@ -14,7 +21,7 @@ exports.create = asyncHandler(async function (request, response, next) {
   }
   let details = [
     new TransactionDetail(
-      Math.floor(Math.random() * 100) + 101,
+      amount,
       childCommerceCode,
       "O-" + Math.floor(Math.random() * 10000) + 1
     ),
@@ -22,7 +29,7 @@ exports.create = asyncHandler(async function (request, response, next) {
   let returnUrl =
     request.protocol + "://" + request.get("host") + "/webpay_plus_mall/commit";
 
-  const createResponse = await (new WebpayPlus.MallTransaction()).create(
+  const createResponse = await new WebpayPlus.MallTransaction().create(
     buyOrder,
     sessionId,
     returnUrl,
@@ -40,6 +47,8 @@ exports.create = asyncHandler(async function (request, response, next) {
     token,
     url,
   };
+  console.log("hola2", createResponse);
+
   response.render("webpay_plus_mall/create", {
     step: "Crear Transacción Mall",
     stepDescription:
@@ -47,18 +56,19 @@ exports.create = asyncHandler(async function (request, response, next) {
       "poder en el siguiente paso redirigir al Tarjetahabiente hacia el formulario de pago",
     viewData,
   });
-});
-
+}
+);
 
 exports.commit = asyncHandler(async function (request, response, next) {
-
   //Flujos:
   //1. Flujo normal (OK): solo llega token_ws
   //2. Timeout (más de 10 minutos en el formulario de Transbank): llegan TBK_ID_SESION y TBK_ORDEN_COMPRA
   //3. Pago abortado (con botón anular compra en el formulario de Webpay): llegan TBK_TOKEN, TBK_ID_SESION, TBK_ORDEN_COMPRA
   //4. Caso atipico: llega todos token_ws, TBK_TOKEN, TBK_ID_SESION, TBK_ORDEN_COMPRA
 
-  let params = request.method === 'GET' ? request.query : request.body;
+  let params = request.method === "GET" ? request.query : request.body;
+
+  console.log("params", params);
 
   let token = params.token_ws;
   let tbkToken = params.TBK_TOKEN;
@@ -71,17 +81,19 @@ exports.commit = asyncHandler(async function (request, response, next) {
     token,
     tbkToken,
     tbkOrdenCompra,
-    tbkIdSesion
+    tbkIdSesion,
   };
 
-  if (token && !tbkToken) {//Flujo 1
-    const commitResponse = await (new WebpayPlus.MallTransaction()).commit(token);
+  if (token && !tbkToken) {
+    //Flujo 1
+    const commitResponse = await new WebpayPlus.MallTransaction().commit(token);
     viewData = {
       token,
       commitResponse,
     };
     step = "Confirmar Transacción Mall diferida";
-    stepDescription = "En este paso tenemos que confirmar la transacción con el objetivo de avisar a " +
+    stepDescription =
+      "En este paso tenemos que confirmar la transacción con el objetivo de avisar a " +
       "Transbank que hemos recibido la transacción ha sido recibida exitosamente. En caso de que " +
       "no se confirme la transacción, ésta será reversada.";
 
@@ -91,18 +103,21 @@ exports.commit = asyncHandler(async function (request, response, next) {
       viewData,
     });
     return;
-  }
-  else if (!token && !tbkToken) {//Flujo 2
+  } else if (!token && !tbkToken) {
+    //Flujo 2
     step = "El pago fue anulado por tiempo de espera.";
-    stepDescription = "En este paso luego de anulación por tiempo de espera (+10 minutos) no es necesario realizar la confirmación ";
-  }
-  else if (!token && tbkToken) {//Flujo 3
+    stepDescription =
+      "En este paso luego de anulación por tiempo de espera (+10 minutos) no es necesario realizar la confirmación ";
+  } else if (!token && tbkToken) {
+    //Flujo 3
     step = "El pago fue anulado por el usuario.";
-    stepDescription = "En este paso luego de abandonar el formulario no es necesario realizar la confirmación ";
-  }
-  else if (token && tbkToken) {//Flujo 4
+    stepDescription =
+      "En este paso luego de abandonar el formulario no es necesario realizar la confirmación ";
+  } else if (token && tbkToken) {
+    //Flujo 4
     step = "El pago es inválido.";
-    stepDescription = "En este paso luego de abandonar el formulario no es necesario realizar la confirmación ";
+    stepDescription =
+      "En este paso luego de abandonar el formulario no es necesario realizar la confirmación ";
   }
 
   response.render("webpay_plus_mall/commit-error", {
@@ -110,13 +125,12 @@ exports.commit = asyncHandler(async function (request, response, next) {
     stepDescription,
     viewData,
   });
-
 });
 
 exports.status = asyncHandler(async function (request, response, next) {
   let token = request.body.token;
 
-  const statusResponse = await (new WebpayPlus.MallTransaction()).status(token);
+  const statusResponse = await new WebpayPlus.MallTransaction().status(token);
 
   let viewData = {
     token,
@@ -138,7 +152,7 @@ exports.refund = asyncHandler(async function (request, response, next) {
   let buyOrder = request.body.buy_order;
   let commerceCode = request.body.commerce_code;
 
-  const refundResponse = await (new WebpayPlus.MallTransaction()).refund(
+  const refundResponse = await new WebpayPlus.MallTransaction().refund(
     token,
     buyOrder,
     commerceCode,
