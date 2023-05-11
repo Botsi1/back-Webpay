@@ -16,8 +16,8 @@ router.use(function (req, res, next) {
 });
 
 router.post("/create", controller.create);
-router.get("/create", controller.create);
-router.get("/commit", controller.commit);
+
+// router.get("/commit", controller.commit);
 router.post("/commit", controller.commit);
 router.post("/status", controller.status);
 router.post("/refund", controller.refund);
