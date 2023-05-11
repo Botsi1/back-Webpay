@@ -7,9 +7,8 @@ var favicon = require("serve-favicon");
 var cors = require("cors");
 var indexRouter = require("./routes/index");
 
-var webpayPlusDeferredRouter = require("./routes/webpay_plus_deferred");
 var webpayPlusMallRouter = require("./routes/webpay_plus_mall");
-var webpayPlusMallDeferredRouter = require("./routes/webpay_plus_mall_deferred");
+
 const { required } = require("nodemon/lib/config");
 
 var app = express();
@@ -18,7 +17,7 @@ if (app.settings.env == "development") {
 }
 
 // view engine setup
-app.set("views", path.join(__dirname, "views"));
+
 app.set("view engine", "pug");
 app.use(
   cors({
@@ -36,9 +35,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 
-app.use("/webpay_plus_deferred", webpayPlusDeferredRouter);
 app.use("/webpay_plus_mall", webpayPlusMallRouter);
-app.use("/webpay_plus_mall_deferred", webpayPlusMallDeferredRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
