@@ -3,9 +3,9 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-var favicon = require("serve-favicon");
+// const pool = require("./database");
+
 var cors = require("cors");
-var indexRouter = require("./routes/index");
 
 var webpayPlusMallRouter = require("./routes/webpay_plus_mall");
 
@@ -18,7 +18,6 @@ if (app.settings.env == "development") {
 
 // view engine setup
 
-app.set("view engine", "pug");
 app.use(
   cors({
     origin: "*",
@@ -26,14 +25,10 @@ app.use(
   })
 );
 
-app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use("/", indexRouter);
 
 app.use("/webpay_plus_mall", webpayPlusMallRouter);
 
