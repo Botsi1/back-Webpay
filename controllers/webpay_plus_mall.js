@@ -88,6 +88,29 @@ exports.commit = asyncHandler(async function (request, response, next) {
 
     console.log(commitResponse);
 
+    //     const transaccion = {
+    //   OrdenComercio:  commitResponse.details[0].buy_order,
+    //   OrdenGenerado: commitResponse.buy_order,
+    //   TotalComprado: commitResponse.details[0].amount,
+    //   ItemsComprados: 'Producto1, Producto2',
+    //   FechaTransaccion: commitResponse.transaction_date,
+    //   CodigoRespuestaComercio: commitResponse.details[0].response_code,
+    //   CodigoComercio: commitResponse.details[0].commerce_code,
+    //   TipoCompra:  commitResponse.details[0].payment_type_code,
+    //   NumeroCuotas: commitResponse.details[0].installments_number,
+    //   FinalNumeroTarjeta: commitResponse.card_detail.card_number,
+    //   NombreUsuario: 'Usuario Ejemplo',
+    //   TransaccionAceptada:commitResponse.details[0].response_code === 0? true:false ,
+    //   ComentarioError: ''
+    // };
+    // insertarTransaccion(transaccion, function(err, result) {
+    //   if (err) {
+    //     console.error('Error al insertar transaccion:', err);
+    //     return;
+    //   }
+    //   console.log('Transaccion insertada con éxito. ID:', result.insertId);
+    // });
+
     response.status(200).json(viewData);
     return;
   } else if (!token && !tbkToken) {

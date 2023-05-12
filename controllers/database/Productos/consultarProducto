@@ -1,0 +1,22 @@
+export function consultarProductos(callback) {
+  const sql = 'SELECT * FROM Productos';
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    connection.query(sql, (err, result) => {
+      connection.release();
+
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      callback(null, result);
+    });
+  });
+}
+

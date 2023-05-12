@@ -1,18 +1,20 @@
-const { Pool } = require("pg");
+const { createPool } = require("mysql");
 
-const pool = new Pool({
-  user: "postgres",
+const pool = createPool({
   host: "localhost",
-  database: "postgres",
+  port: 3306, // Puerto por defecto de MySQL
+  user: "root",
   password: "12345",
+  database: "mynigth",
 });
 
-pool.connect((err, client, release) => {
+pool.getConnection((err, connection) => {
   if (err) {
     console.error("Error connecting to database", err.stack);
   } else {
     console.log("Connected to database");
   }
-  release();
+  connection.release();
 });
+
 module.exports = pool;

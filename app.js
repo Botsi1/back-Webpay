@@ -3,7 +3,8 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-const pool = require("./database");
+// const pool = require("./database");
+
 var cors = require("cors");
 
 var webpayPlusMallRouter = require("./routes/webpay_plus_mall");
